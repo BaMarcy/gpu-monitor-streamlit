@@ -11,6 +11,59 @@ import sqlite3
 import streamlit as st
 import pandas as pd
 
+from flask import Flask, jsonify, request
+import sqlite3
+from datetime import datetime
+import json
+
+
+if not hasattr(st, 'already_started_server'):
+    # Hack the fact that Python modules (like st) only load once to
+    # keep track of whether this file already ran.
+    st.already_started_server = True
+
+    st.write('''
+        The first time this script executes it will run forever because it's
+        running a Flask server.
+
+        Just close this browser tab and open a new one to see your Streamlit
+        app.
+    ''')
+    app = Flask(__name__)
+    con = sqlite3.connect('data.db', check_same_thread=False)
+    cur = con.cursor()
+
+    @app.route('/gpu', methods=["POST"])
+    def monitor_GPU():
+        data = json.loads(request.data)
+        # str, str, str, str, real, real, real, real
+        l  =[
+            datetime.now(),
+            data["name"],
+            data["driver"], 
+            data["memoryTotal"], 
+            data["memoryFree"], 
+            data["memoryUsed"], 
+            data["temperature"]
+            ]
+        print(data["table"])
+        try:
+            sql = '''INSERT INTO {} (date, name, driver, memoryTotal, memoryFree, memoryUsed, temperature)
+                    VALUES ( ? , ? , ? , ? , ? , ? , ?)'''.format(data["table"])
+            cur.execute(sql, l)
+        except:
+            sql = '''CREATE TABLE IF NOT EXISTS {} (date text, name text, driver text, memoryTotal real, memoryFree real, 
+                        memoryUsed real, temperature real)'''.format(data["table"])
+            cur.execute(sql)
+        con.commit()
+        return jsonify({'result': 'OK'})
+
+
+
+    app.run(threaded=True, host='0.0.0.0', port=6666)
+
+
+
 con = sqlite3.connect('data.db', check_same_thread=False)
 cur = con.cursor()
 cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
