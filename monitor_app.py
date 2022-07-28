@@ -48,7 +48,7 @@ def monitor_GPU():
 app.run(threaded=True, host='0.0.0.0', port=6666)
 
 
-
+""" 
 
 con = sqlite3.connect('data.db', check_same_thread=False)
 cur = con.cursor()
@@ -71,3 +71,4 @@ if st.button('Refresh'):
     st.download_button(label="Download data as CSV", data=df.to_csv().encode('utf-8'), file_name='data.csv', mime='text/csv')
     st.area_chart(df['temperature'])
     st.area_chart(df['memoryUsed'])
+ """
