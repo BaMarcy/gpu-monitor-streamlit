@@ -40,4 +40,6 @@ def monitor_GPU():
     con.commit()
     return jsonify({'result': 'OK'})
 
-app.run(threaded=True, host='0.0.0.0', port=6666)
+
+if __main__ == "__main__":
+    app.run(threaded=True, host='0.0.0.0', port=6666)
